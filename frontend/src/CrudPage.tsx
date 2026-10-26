@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { api } from "./api";
 import type { Campo, Registro } from "./types";
 
@@ -35,6 +35,7 @@ export function CrudPage({ titulo, recurso, campos }: Props) {
   const [form, setForm] = useState<Formulario>(formularioVacio(campos));
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const seccionRef = useRef<HTMLElement>(null);
 
   async function cargar() {
     try {
@@ -71,6 +72,7 @@ export function CrudPage({ titulo, recurso, campos }: Props) {
     setEditandoId(registro.id!);
     setForm(Object.fromEntries(campos.map((c) => [c.nombre, String(registro[c.nombre] ?? "")])));
     setError("");
+    seccionRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
   async function eliminar(id: number) {
@@ -85,7 +87,7 @@ export function CrudPage({ titulo, recurso, campos }: Props) {
   }
 
   return (
-    <section>
+    <section ref={seccionRef}>
       <h2>{editandoId ? `Editar ${titulo}` : `Nuevo ${titulo}`}</h2>
       <form className="formulario" onSubmit={guardar}>
         {campos.map((c) => (
