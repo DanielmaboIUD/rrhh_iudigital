@@ -1,0 +1,8 @@
+{
+  "name": "sofseg",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
