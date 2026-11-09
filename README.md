@@ -11,7 +11,7 @@ controladores solo conocen la interfaz, y la implementación concreta se inyecta
 
 ## Ejecutar
 
-Requiere la base `rrhh_iudigital` creada con los scripts `00`–`02` y [mkcert](https://github.com/FiloSottile/mkcert).
+Requiere la base `rrhh_iudigital` creada con los scripts `00`–`03`, en ese orden, y [mkcert](https://github.com/FiloSottile/mkcert).
 
 ```
 mkcert -install
@@ -20,6 +20,7 @@ mkcert -key-file certs/localhost-key.pem -cert-file certs/localhost.pem localhos
 
 pnpm install
 cp backend/.env.example backend/.env   # completar DB_PASSWORD
+pnpm --filter backend crear-admin      # primer administrador
 pnpm dev
 ```
 
