@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
+import { useAuth } from "./auth/AuthContext";
 import { FamiliaresPage } from "./pages/FamiliaresPage";
 import { FormacionesPage } from "./pages/FormacionesPage";
 import { FuncionariosPage } from "./pages/FuncionariosPage";
+import { LoginPage } from "./pages/LoginPage";
 import type { Catalogos, Opcion } from "./types";
 
 type Pestana = "funcionarios" | "familiares" | "formaciones";
@@ -14,6 +16,13 @@ const PESTANAS: [Pestana, string][] = [
 ];
 
 export function App() {
+  const { usuario, cargando } = useAuth();
+  if (cargando) return <main><p>Cargando...</p></main>;
+  return usuario ? <Principal /> : <LoginPage />;
+}
+
+function Principal() {
+  const { usuario, logout } = useAuth();
   const [pestana, setPestana] = useState<Pestana>("funcionarios");
   const [catalogos, setCatalogos] = useState<Catalogos | null>(null);
   const [funcionarios, setFuncionarios] = useState<Opcion[]>([]);
@@ -35,7 +44,13 @@ export function App() {
 
   return (
     <main>
-      <h1>Recursos Humanos · IU Digital</h1>
+      <header className="cabecera">
+        <h1>Recursos Humanos · IU Digital</h1>
+        <div>
+          <span>{usuario?.nombreUsuario} · {usuario?.rol}</span>
+          <button className="secundario" onClick={logout}>Cerrar sesión</button>
+        </div>
+      </header>
       <nav>
         {PESTANAS.map(([clave, texto]) => (
           <button
