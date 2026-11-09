@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 
 export class ErrorHttp extends Error {
-  constructor(public readonly status: number, message: string) {
+  constructor(public readonly status: number, message: string, public readonly codigo?: string) {
     super(message);
   }
 }
@@ -19,7 +19,7 @@ const ERRORES_PG: Record<string, [number, string]> = {
 
 export function manejarErrores(err: any, _req: Request, res: Response, _next: NextFunction) {
   if (err instanceof ErrorHttp) {
-    return res.status(err.status).json({ error: err.message });
+    return res.status(err.status).json({ error: err.message, codigo: err.codigo });
   }
   const errorPg = ERRORES_PG[err.code];
   if (errorPg) {
@@ -27,6 +27,9 @@ export function manejarErrores(err: any, _req: Request, res: Response, _next: Ne
   }
   if (err.type === "entity.parse.failed") {
     return res.status(400).json({ error: "JSON inválido" });
+  }
+  if (err.type === "entity.too.large") {
+    return res.status(413).json({ error: "La petición es demasiado grande" });
   }
   console.error(err);
   res.status(500).json({ error: "Error interno del servidor" });
