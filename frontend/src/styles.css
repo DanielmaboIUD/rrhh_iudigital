@@ -123,6 +123,25 @@ button:disabled {
   border-radius: 4px;
 }
 
+.formulario input[readonly],
+.formulario select:disabled {
+  background: #eceff3;
+  color: #555;
+}
+
+.formulario label.casilla {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.aviso {
+  padding: 8px 12px;
+  background: #e6f4ea;
+  color: #1e6b34;
+  border-radius: 4px;
+}
+
 .acciones {
   display: flex;
   gap: 6px;

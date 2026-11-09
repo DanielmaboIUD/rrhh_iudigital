@@ -1,4 +1,4 @@
-import type { Catalogos, Registro, UsuarioSesion } from "./types";
+import type { Catalogos, DatosCuenta, NuevoUsuario, Registro, Rol, Usuario, UsuarioSesion } from "./types";
 
 let renovacion: Promise<boolean> | null = null;
 let notificarSesionPerdida = () => {};
@@ -57,6 +57,18 @@ export const api = {
     pedir<Registro>(`/${recurso}/${id}`, { method: "PUT", body: JSON.stringify(datos) }),
   eliminar: (recurso: string, id: number) =>
     pedir<void>(`/${recurso}/${id}`, { method: "DELETE" }),
+};
+
+export const apiUsuarios = {
+  listar: () => pedir<Usuario[]>("/usuarios"),
+  roles: () => pedir<Rol[]>("/roles"),
+  crear: (datos: NuevoUsuario) => pedir<Usuario>("/usuarios", { method: "POST", body: JSON.stringify(datos) }),
+  actualizar: (id: number, datos: DatosCuenta) =>
+    pedir<Usuario>(`/usuarios/${id}`, { method: "PUT", body: JSON.stringify(datos) }),
+  cambiarContrasena: (id: number, contrasena: string) =>
+    pedir<void>(`/usuarios/${id}/contrasena`, { method: "PUT", body: JSON.stringify({ contrasena }) }),
+  desbloquear: (id: number) => pedir<Usuario>(`/usuarios/${id}/desbloquear`, { method: "POST" }),
+  eliminar: (id: number) => pedir<void>(`/usuarios/${id}`, { method: "DELETE" }),
 };
 
 export const apiAuth = {

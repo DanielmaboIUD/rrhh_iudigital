@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import { useAuth } from "./auth/AuthContext";
+import { puede } from "./auth/permisos";
 import { FamiliaresPage } from "./pages/FamiliaresPage";
 import { FormacionesPage } from "./pages/FormacionesPage";
 import { FuncionariosPage } from "./pages/FuncionariosPage";
 import { LoginPage } from "./pages/LoginPage";
+import { UsuariosPage } from "./pages/UsuariosPage";
 import type { Catalogos, Opcion } from "./types";
 
-type Pestana = "funcionarios" | "familiares" | "formaciones";
+type Pestana = "funcionarios" | "familiares" | "formaciones" | "usuarios";
 
 const PESTANAS: [Pestana, string][] = [
   ["funcionarios", "Funcionarios"],
   ["familiares", "Grupo familiar"],
   ["formaciones", "Formación académica"],
+  ["usuarios", "Usuarios"],
 ];
 
 export function App() {
@@ -52,7 +55,7 @@ function Principal() {
         </div>
       </header>
       <nav>
-        {PESTANAS.map(([clave, texto]) => (
+        {PESTANAS.filter(([clave]) => puede(usuario!.rol, clave, "ver")).map(([clave, texto]) => (
           <button
             key={clave}
             className={pestana === clave ? "activa" : ""}
@@ -72,6 +75,7 @@ function Principal() {
       {catalogos && pestana === "formaciones" && (
         <FormacionesPage catalogos={catalogos} funcionarios={funcionarios} />
       )}
+      {pestana === "usuarios" && <UsuariosPage funcionarios={funcionarios} />}
     </main>
   );
 }
