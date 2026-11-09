@@ -5,13 +5,16 @@
   "scripts": {
     "dev": "tsx watch --env-file=.env src/server.ts",
     "start": "tsx --env-file=.env src/server.ts",
+    "crear-admin": "tsx --env-file=.env src/scripts/crearAdmin.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "express": "^5.3.0",
     "pg": "^8.23.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
     "@types/pg": "^8.23.1",
