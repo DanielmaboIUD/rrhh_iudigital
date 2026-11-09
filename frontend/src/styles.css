@@ -49,6 +49,57 @@ button.peligro {
   background: #c0392b;
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.cabecera div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.login {
+  max-width: 360px;
+  margin-top: 10vh;
+}
+
+.login form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 6px;
+}
+
+.login label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.login input {
+  padding: 6px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+}
+
+.login .error {
+  margin: 0;
+}
+
 .formulario {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

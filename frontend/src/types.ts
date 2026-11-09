@@ -1,5 +1,12 @@
 export type Registro = Record<string, string | number | null> & { id?: number };
 
+export interface UsuarioSesion {
+  id: number;
+  nombreUsuario: string;
+  rol: "ADMIN" | "RRHH" | "CONSULTA" | "FUNCIONARIO";
+  funcionarioId: number | null;
+}
+
 export interface Opcion {
   id: number;
   nombre: string;
