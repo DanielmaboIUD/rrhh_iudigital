@@ -1,13 +1,21 @@
 import { pool } from "../config/db";
 import type { FormacionAcademica } from "../models/FormacionAcademica";
-import type { Dao } from "./Dao";
+import type { DaoPorFuncionario } from "./Dao";
 
 const COLUMNAS = "id, funcionario_id, universidad_id, nivel_estudio_id, titulo, fecha_grado";
 
-export class FormacionAcademicaDao implements Dao<FormacionAcademica> {
+export class FormacionAcademicaDao implements DaoPorFuncionario<FormacionAcademica> {
   async findAll(): Promise<FormacionAcademica[]> {
     const { rows } = await pool.query<FormacionAcademica>(
       `SELECT ${COLUMNAS} FROM rrhh.formacion_academica ORDER BY funcionario_id, fecha_grado`,
+    );
+    return rows;
+  }
+
+  async findAllByFuncionario(funcionarioId: number): Promise<FormacionAcademica[]> {
+    const { rows } = await pool.query<FormacionAcademica>(
+      `SELECT ${COLUMNAS} FROM rrhh.formacion_academica WHERE funcionario_id = $1 ORDER BY fecha_grado`,
+      [funcionarioId],
     );
     return rows;
   }
