@@ -1,6 +1,7 @@
-import { pool } from "../config/db";
+import { enTransaccion, pool } from "../config/db";
 import type { Funcionario } from "../models/Funcionario";
 import type { Dao } from "./Dao";
+import { bloquearAdminsActivos, exigirOtroAdmin } from "./UsuarioDao";
 
 const COLUMNAS = `id, tipo_identificacion_id, numero_identificacion, nombres, apellidos,
   estado_civil_id, sexo_id, direccion, telefono, fecha_nacimiento`;
@@ -46,8 +47,14 @@ export class FuncionarioDao implements Dao<Funcionario> {
     return rows[0] ?? null;
   }
 
+  // La cuenta enlazada se borra en cascada, así que puede ser el último administrador
   async delete(id: number): Promise<boolean> {
-    const { rowCount } = await pool.query("DELETE FROM rrhh.funcionario WHERE id = $1", [id]);
-    return rowCount === 1;
+    return enTransaccion(async (cliente) => {
+      const admins = await bloquearAdminsActivos(cliente);
+      const { rows } = await cliente.query<{ id: number }>("SELECT id FROM rrhh.usuario WHERE funcionario_id = $1", [id]);
+      if (rows[0]) exigirOtroAdmin(admins, rows[0].id, "Su cuenta es la del único administrador activo");
+      const { rowCount } = await cliente.query("DELETE FROM rrhh.funcionario WHERE id = $1", [id]);
+      return rowCount === 1;
+    });
   }
 }
