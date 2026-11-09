@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node --use-system-ca node_modules/vite/bin/vite.js",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit"
   },
