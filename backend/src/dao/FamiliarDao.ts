@@ -1,14 +1,22 @@
 import { pool } from "../config/db";
 import type { Familiar } from "../models/Familiar";
-import type { Dao } from "./Dao";
+import type { DaoPorFuncionario } from "./Dao";
 
 const COLUMNAS = `id, funcionario_id, parentesco_id, tipo_identificacion_id, numero_identificacion,
   nombres, apellidos, sexo_id, fecha_nacimiento, telefono`;
 
-export class FamiliarDao implements Dao<Familiar> {
+export class FamiliarDao implements DaoPorFuncionario<Familiar> {
   async findAll(): Promise<Familiar[]> {
     const { rows } = await pool.query<Familiar>(
       `SELECT ${COLUMNAS} FROM rrhh.familiar ORDER BY funcionario_id, apellidos, nombres`,
+    );
+    return rows;
+  }
+
+  async findAllByFuncionario(funcionarioId: number): Promise<Familiar[]> {
+    const { rows } = await pool.query<Familiar>(
+      `SELECT ${COLUMNAS} FROM rrhh.familiar WHERE funcionario_id = $1 ORDER BY apellidos, nombres`,
+      [funcionarioId],
     );
     return rows;
   }

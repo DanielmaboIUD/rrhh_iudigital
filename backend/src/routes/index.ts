@@ -9,26 +9,55 @@ import { FuncionarioDao } from "../dao/FuncionarioDao";
 import { RefreshTokenDao } from "../dao/RefreshTokenDao";
 import { UsuarioDao } from "../dao/UsuarioDao";
 import { autenticar } from "../middlewares/autenticar";
+import { autorizar } from "../middlewares/autorizar";
 import { limiteLogin } from "../middlewares/limiteLogin";
+import type { CodigoRol } from "../models/Rol";
+import { PoliticaFuncionario, PoliticaPorFuncionario } from "../politicas/Politica";
 import { AuthServicio } from "../servicios/AuthServicio";
 
 export const router = Router();
+
+interface PermisosCrud {
+  crear: CodigoRol[];
+  editar: CodigoRol[];
+  eliminar: CodigoRol[];
+}
+
+const LECTURA: CodigoRol[] = ["ADMIN", "RRHH", "CONSULTA", "FUNCIONARIO"];
+
+function rutasCrud<T>(ruta: string, controller: CrudController<T>, permisos: PermisosCrud) {
+  router.get(ruta, autorizar(...LECTURA), controller.listar);
+  router.get(`${ruta}/:id`, autorizar(...LECTURA), controller.obtener);
+  router.post(ruta, autorizar(...permisos.crear), controller.crear);
+  router.put(`${ruta}/:id`, autorizar(...permisos.editar), controller.actualizar);
+  router.delete(`${ruta}/:id`, autorizar(...permisos.eliminar), controller.eliminar);
+}
 
 const auth = new AuthController(new AuthServicio(new UsuarioDao(), new RefreshTokenDao()));
 router.post("/auth/login", limiteLogin, auth.login);
 router.post("/auth/refresh", auth.refresh);
 router.post("/auth/logout", auth.logout);
-router.get("/auth/me", autenticar, auth.yo);
 
-function rutasCrud<T>(ruta: string, controller: CrudController<T>) {
-  router.get(ruta, controller.listar);
-  router.get(`${ruta}/:id`, controller.obtener);
-  router.post(ruta, controller.crear);
-  router.put(`${ruta}/:id`, controller.actualizar);
-  router.delete(`${ruta}/:id`, controller.eliminar);
-}
+// Todo lo registrado después de esta línea exige sesión
+router.use(autenticar);
 
-rutasCrud("/funcionarios", new CrudController(new FuncionarioDao()));
-rutasCrud("/familiares", new CrudController(new FamiliarDao()));
-rutasCrud("/formaciones", new CrudController(new FormacionAcademicaDao()));
-router.get("/catalogos", new CatalogoController(new CatalogoDao()).listar);
+router.get("/auth/me", auth.yo);
+
+const funcionarios = new FuncionarioDao();
+rutasCrud("/funcionarios", new CrudController(funcionarios, new PoliticaFuncionario(funcionarios)), {
+  crear: ["ADMIN", "RRHH"],
+  editar: ["ADMIN", "RRHH", "FUNCIONARIO"],
+  eliminar: ["ADMIN"],
+});
+
+const permisosPorFuncionario: PermisosCrud = {
+  crear: ["ADMIN", "RRHH", "FUNCIONARIO"],
+  editar: ["ADMIN", "RRHH", "FUNCIONARIO"],
+  eliminar: ["ADMIN", "FUNCIONARIO"],
+};
+const familiares = new FamiliarDao();
+rutasCrud("/familiares", new CrudController(familiares, new PoliticaPorFuncionario(familiares)), permisosPorFuncionario);
+const formaciones = new FormacionAcademicaDao();
+rutasCrud("/formaciones", new CrudController(formaciones, new PoliticaPorFuncionario(formaciones)), permisosPorFuncionario);
+
+router.get("/catalogos", autorizar(...LECTURA), new CatalogoController(new CatalogoDao()).listar);
