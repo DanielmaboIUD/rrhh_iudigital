@@ -47,7 +47,7 @@ export class CrudController<T> {
 
   eliminar = async (req: Request<{ id: string }>, res: Response) => {
     const id = parsearId(req.params.id);
-    await this.cargar(id, req.usuario!);
+    this.politica.validarEliminacion(req.usuario!, await this.cargar(id, req.usuario!));
     if (!(await this.dao.delete(id))) throw new ErrorHttp(404, "Registro no encontrado");
     res.status(204).end();
   };

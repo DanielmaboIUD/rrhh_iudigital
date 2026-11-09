@@ -21,8 +21,8 @@ interface ClaimsAcceso extends jwt.JwtPayload {
   funcionarioId: number | null;
 }
 
-const FORMATO_NOMBRE = /^[a-z0-9._-]{4,50}$/;
-const MAX_BYTES_CONTRASENA = 72;
+export const FORMATO_NOMBRE = /^[a-z0-9._-]{4,50}$/;
+export const MAX_BYTES_CONTRASENA = 72;
 
 // Iguala el tiempo de respuesta cuando el usuario no existe
 const hashFicticio = bcrypt.hash(randomBytes(32).toString("hex"), entorno.bcryptCosto);

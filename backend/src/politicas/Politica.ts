@@ -8,6 +8,7 @@ export interface Politica<T> {
   puedeAcceder(usuario: UsuarioSesion, entidad: T): boolean;
   paraCrear(usuario: UsuarioSesion, datos: T): T;
   paraEditar(usuario: UsuarioSesion, datos: T, actual: T): T;
+  validarEliminacion(usuario: UsuarioSesion, entidad: T): void;
 }
 
 // null: el rol no está restringido a registros propios
@@ -44,6 +45,11 @@ export class PoliticaFuncionario implements Politica<Funcionario> {
       numero_identificacion: actual.numero_identificacion,
     };
   }
+
+  // Borrar la ficha propia eliminaría en cascada la cuenta con la que se opera
+  validarEliminacion(usuario: UsuarioSesion, entidad: Funcionario) {
+    if (usuario.funcionarioId === entidad.id) throw new ErrorHttp(409, "No puede eliminar su propia ficha");
+  }
 }
 
 export class PoliticaPorFuncionario<T extends { funcionario_id: number }> implements Politica<T> {
@@ -66,6 +72,8 @@ export class PoliticaPorFuncionario<T extends { funcionario_id: number }> implem
   paraEditar(usuario: UsuarioSesion, datos: T, _actual: T) {
     return this.forzarPropietario(usuario, datos);
   }
+
+  validarEliminacion() {}
 
   private forzarPropietario(usuario: UsuarioSesion, datos: T): T {
     const propio = funcionarioPropio(usuario);
