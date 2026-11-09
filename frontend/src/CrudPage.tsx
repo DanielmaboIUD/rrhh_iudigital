@@ -6,12 +6,15 @@ interface Props {
   titulo: string;
   recurso: string;
   campos: Campo[];
+  puedeCrear: boolean;
+  puedeEditar: boolean;
+  puedeEliminar: boolean;
 }
 
 type Formulario = Record<string, string>;
 
 function formularioVacio(campos: Campo[]): Formulario {
-  return Object.fromEntries(campos.map((c) => [c.nombre, ""]));
+  return Object.fromEntries(campos.map((c) => [c.nombre, c.valorInicial === undefined ? "" : String(c.valorInicial)]));
 }
 
 function aRegistro(form: Formulario, campos: Campo[]): Registro {
@@ -30,7 +33,7 @@ function textoCelda(campo: Campo, valor: Registro[string]): string {
   return String(valor);
 }
 
-export function CrudPage({ titulo, recurso, campos }: Props) {
+export function CrudPage({ titulo, recurso, campos, puedeCrear, puedeEditar, puedeEliminar }: Props) {
   const [registros, setRegistros] = useState<Registro[]>([]);
   const [form, setForm] = useState<Formulario>(formularioVacio(campos));
   const [editandoId, setEditandoId] = useState<number | null>(null);
@@ -86,10 +89,13 @@ export function CrudPage({ titulo, recurso, campos }: Props) {
     }
   }
 
+  const mostrarFormulario = editandoId ? puedeEditar : puedeCrear;
+  const mostrarAcciones = puedeEditar || puedeEliminar;
+
   return (
     <section ref={seccionRef}>
-      <h2>{editandoId ? `Editar ${titulo}` : `Nuevo ${titulo}`}</h2>
-      <form className="formulario" onSubmit={guardar}>
+      {mostrarFormulario && <h2>{editandoId ? `Editar ${titulo}` : `Nuevo ${titulo}`}</h2>}
+      {mostrarFormulario && <form className="formulario" onSubmit={guardar}>
         {campos.map((c) => (
           <label key={c.nombre}>
             {c.etiqueta}
@@ -97,6 +103,7 @@ export function CrudPage({ titulo, recurso, campos }: Props) {
               <select
                 value={form[c.nombre]}
                 required={!c.opcional}
+                disabled={c.soloLectura}
                 onChange={(e) => setForm({ ...form, [c.nombre]: e.target.value })}
               >
                 <option value="">Seleccione...</option>
@@ -109,6 +116,7 @@ export function CrudPage({ titulo, recurso, campos }: Props) {
                 type={c.tipo ?? "text"}
                 value={form[c.nombre]}
                 required={!c.opcional}
+                readOnly={c.soloLectura}
                 onChange={(e) => setForm({ ...form, [c.nombre]: e.target.value })}
               />
             )}
@@ -118,7 +126,7 @@ export function CrudPage({ titulo, recurso, campos }: Props) {
           <button type="submit">{editandoId ? "Actualizar" : "Crear"}</button>
           {editandoId && <button type="button" className="secundario" onClick={limpiar}>Cancelar</button>}
         </div>
-      </form>
+      </form>}
 
       {error && <p className="error">{error}</p>}
 
@@ -127,17 +135,19 @@ export function CrudPage({ titulo, recurso, campos }: Props) {
           <thead>
             <tr>
               {campos.map((c) => <th key={c.nombre}>{c.etiqueta}</th>)}
-              <th>Acciones</th>
+              {mostrarAcciones && <th>Acciones</th>}
             </tr>
           </thead>
           <tbody>
             {registros.map((r) => (
               <tr key={r.id}>
                 {campos.map((c) => <td key={c.nombre}>{textoCelda(c, r[c.nombre])}</td>)}
-                <td className="acciones">
-                  <button className="secundario" onClick={() => editar(r)}>Editar</button>
-                  <button className="peligro" onClick={() => eliminar(r.id!)}>Eliminar</button>
-                </td>
+                {mostrarAcciones && (
+                  <td className="acciones">
+                    {puedeEditar && <button className="secundario" onClick={() => editar(r)}>Editar</button>}
+                    {puedeEliminar && <button className="peligro" onClick={() => eliminar(r.id!)}>Eliminar</button>}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

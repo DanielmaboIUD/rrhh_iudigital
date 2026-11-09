@@ -1,10 +1,14 @@
+import { useAuth } from "../auth/AuthContext";
+import { permisosCrud } from "../auth/permisos";
 import { CrudPage } from "../CrudPage";
 import type { Campo, Catalogos } from "../types";
 
 export function FuncionariosPage({ catalogos }: { catalogos: Catalogos }) {
+  const rol = useAuth().usuario!.rol;
+  const identificacionFija = rol === "FUNCIONARIO";
   const campos: Campo[] = [
-    { nombre: "tipo_identificacion_id", etiqueta: "Tipo id.", opciones: catalogos.tiposIdentificacion },
-    { nombre: "numero_identificacion", etiqueta: "Número id." },
+    { nombre: "tipo_identificacion_id", etiqueta: "Tipo id.", opciones: catalogos.tiposIdentificacion, soloLectura: identificacionFija },
+    { nombre: "numero_identificacion", etiqueta: "Número id.", soloLectura: identificacionFija },
     { nombre: "nombres", etiqueta: "Nombres" },
     { nombre: "apellidos", etiqueta: "Apellidos" },
     { nombre: "estado_civil_id", etiqueta: "Estado civil", opciones: catalogos.estadosCiviles },
@@ -13,5 +17,5 @@ export function FuncionariosPage({ catalogos }: { catalogos: Catalogos }) {
     { nombre: "telefono", etiqueta: "Teléfono", tipo: "tel" },
     { nombre: "fecha_nacimiento", etiqueta: "Fecha nacimiento", tipo: "date" },
   ];
-  return <CrudPage titulo="funcionario" recurso="funcionarios" campos={campos} />;
+  return <CrudPage titulo="funcionario" recurso="funcionarios" campos={campos} {...permisosCrud(rol, "funcionarios")} />;
 }
